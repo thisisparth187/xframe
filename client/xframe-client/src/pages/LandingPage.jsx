@@ -1,14 +1,38 @@
 import { useState } from "react";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { Loader2Icon } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
 import StarBorder from "@/components/blocks/Animations/StarBorder/StarBorder";
+import { useRef } from "react";
+import html2canvas from "html2canvas";
 
 export default function LandingPage() {
     const [url, setUrl] = useState("");
     const [error, setError] = useState("");
     const [postData, setPostData] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const previewRef = useRef(null);
+
+
+    const handleDownload = async () => {
+        if (!previewRef.current) return;
+
+        const canvas = await html2canvas(previewRef.current, {
+            useCORS: true, // for loading external images
+            backgroundColor: null, // to preserve transparency
+            scale: 2, // higher resolution
+        });
+
+        const dataUrl = canvas.toDataURL("image/png");
+
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "x-post.png";
+        link.click();
+    };
 
     const handleFetch = async () => {
         if (!url.startsWith("https://x.com/") && !url.startsWith("https://twitter.com/")) {
@@ -17,6 +41,7 @@ export default function LandingPage() {
         }
 
         setError("");
+        setLoading(true);
         try {
             const response = await fetch("http://localhost:5000/api/scrape", {
                 method: "POST",
@@ -39,6 +64,8 @@ export default function LandingPage() {
         } catch (err) {
             console.error(err);
             setError("Something went wrong while fetching the post.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -79,8 +106,15 @@ export default function LandingPage() {
                                 onChange={(e) => setUrl(e.target.value)}
                             />
                             {error && <p className="text-sm text-red-500">{error}</p>}
-                            <Button className="w-full" onClick={handleFetch}>
-                                Fetch Post
+                            <Button className="w-full" onClick={handleFetch} disabled={loading}>
+                                {loading ? (
+                                    <>
+                                        <Loader2Icon className="animate-spin mr-2 h-4 w-4" />
+                                        Please wait
+                                    </>
+                                ) : (
+                                    "Fetch Post"
+                                )}
                             </Button>
                         </CardContent>
                     </Card>
@@ -89,35 +123,73 @@ export default function LandingPage() {
                     <h2 className="text-lg font-semibold mb-2 text-gray-100">Preview</h2>
                     <div className="w-full h-max-100 bg-amber-50 rounded-md items-center content-center p-4 ">
                         {postData ? (
-                            <div className="aspect-video bg-white border rounded-xl p-4 flex flex-col gap-3">
+                            <div ref={previewRef}
+                                style={{
+                                    aspectRatio: 16 / 9,            // 16:9 aspect ratio (same as 'aspect-video')
+                                    border: "1px solid #ccc",     // Equivalent to 'border'
+                                    borderRadius: "0.75rem",      // 'rounded-xl' = 12px = 0.75rem
+                                    padding: "1rem",              // 'p-4' = 1rem = 16px
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "0.75rem",               // 'gap-3' = 0.75rem = 12px
+                                    backgroundColor: "white"      // Optional: ensure white background for html2canvas
+                                }}>
                                 <div className="flex items-center gap-4">
                                     <img
                                         src={postData.profile_img}
                                         alt="Profile"
-                                        className="w-12 h-12 rounded-full object-cover"
+                                        style={{
+                                            width: "3rem",            // w-12 = 3rem = 48px
+                                            height: "3rem",           // h-12 = 3rem = 48px
+                                            borderRadius: "9999px",   // rounded-full = full circular
+                                            objectFit: "cover"        // object-cover = cover image inside box
+                                        }}
                                     />
                                     <div>
-                                        <p className="font-semibold">{postData.displayName}</p>
-                                        <p className="text-sm text-gray-500">@{postData.handle}</p>
+                                        <p style={{
+                                            fontWeight: "600", // font-semibold
+                                            margin: 0,
+                                        }}>{postData.displayName}</p>
+
+                                        <p style={{
+                                            fontSize: "0.875rem", // text-sm = 14px
+                                            color: "#99A1AF",
+                                            margin: 0,
+                                        }}>@{postData.handle}</p>
                                     </div>
                                 </div>
-                                <p className="text-lg text-gray-800 whitespace-pre-line">{postData.text}</p>
+
+                                <p style={{
+                                    fontSize: "1.125rem", // text-lg = 18px
+                                    whiteSpace: "pre-line",
+                                    color: "#101828",
+                                    marginTop: "1rem",
+                                    marginBottom: "1rem",
+                                }}>{postData.text}</p>
+
                                 {postData.media.map((m, i) => (
-                                    <div key={i} className="relative">
-                                        <img src={m.url} className="rounded-md" />
-                                        {m.type === "video" && (
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <PlayIcon className="h-12 w-12 text-white opacity-80" />
-                                            </div>
-                                        )}
+                                    <div key={i} style={{
+                                        position: "relative",
+                                        marginBottom: "0.75rem",
+                                    }}>
+                                        <img src={m.url} style={{
+                                            borderRadius: "0.375rem", // rounded-md = 6px
+                                            maxWidth: "100%",
+                                            display: "block",
+                                        }} />
+
                                     </div>
                                 ))}
+                                <Button style={{ marginTop: "1rem" }} onClick={handleDownload}>
+                                    Download as PNG
+                                </Button>
 
                             </div>
                         ) : (
                             <div className="aspect-video bg-white border rounded-xl flex items-center justify-center text-gray-400">
                                 Post preview will appear here
                             </div>
+
                         )}
                     </div>
 
