@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import { Loader2Icon } from "lucide-react";
+import { AlignCenter, Loader2Icon } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 import Particles from "@/components/blocks/Backgrounds/Particles/Particles";
 import StarBorder from "@/components/blocks/Animations/StarBorder/StarBorder";
@@ -180,9 +180,7 @@ export default function LandingPage() {
 
                                     </div>
                                 ))}
-                                <Button style={{ marginTop: "1rem" }} onClick={handleDownload}>
-                                    Download as PNG
-                                </Button>
+
 
                             </div>
                         ) : (
@@ -191,6 +189,9 @@ export default function LandingPage() {
                             </div>
 
                         )}
+                        <Button style={{ marginTop: "1rem", }} onClick={handleDownload}>
+                            Download as PNG
+                        </Button>
                     </div>
 
                 </div>
