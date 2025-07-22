@@ -13,6 +13,7 @@ export default function LandingPage() {
     const [error, setError] = useState("");
     const [postData, setPostData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isDarkPoster, setIsDarkPoster] = useState(false);
 
     const previewRef = useRef(null);
 
@@ -88,8 +89,8 @@ export default function LandingPage() {
             {/* Foreground Content */}
             <div className="relative z-10 flex flex-col items-center w-full">
                 <div className="text-center mb-6">
-                    <h1 className="text-4xl font-bold mb-2 text-gray-50">Xframe</h1>
-                    <p className="text-gray-200">Turn X posts into beautiful posters</p>
+                    <h1 className="text-4xl font-bold mb-2 text-gray-50">XFrame</h1>
+                    <p className="text-gray-200">Turn X posts into picture</p>
                 </div>
                 <StarBorder
                     as="span"
@@ -121,7 +122,7 @@ export default function LandingPage() {
                 </StarBorder>
                 <div className="mt-10 w-full max-w-xl">
                     <h2 className="text-lg font-semibold mb-2 text-gray-100">Preview</h2>
-                    <div className="w-full h-max-100 bg-amber-50 rounded-md items-center content-center p-4 ">
+                    <div className="w-full h-max-100 bg-white rounded-md items-center content-center p-4 ">
                         {postData ? (
                             <div ref={previewRef}
                                 style={{
@@ -132,8 +133,9 @@ export default function LandingPage() {
                                     display: "flex",
                                     flexDirection: "column",
                                     gap: "0.75rem",               // 'gap-3' = 0.75rem = 12px
-                                    backgroundColor: "white"      // Optional: ensure white background for html2canvas
-                                }}>
+                                    backgroundColor: isDarkPoster ? '#052d48' : "white",      // Optional: ensure white background for html2canvas
+                                    color: isDarkPoster ? '#e7f4fd' : '#101828'
+                                }} className='duration-200 shadow-lg'>
                                 <div className="flex items-center gap-4">
                                     <img
                                         src={postData.profile_img}
@@ -148,24 +150,25 @@ export default function LandingPage() {
                                     <div>
                                         <p style={{
                                             fontWeight: "600", // font-semibold
-                                            margin: 0,
-                                        }}>{postData.displayName}</p>
+                                            margin: 0,     // Optional: ensure white background for html2canvas
+                                            color: isDarkPoster ? '#e7f4fd' : '#101828'
+                                        }} className='duration-200'>{postData.displayName}</p>
 
                                         <p style={{
-                                            fontSize: "0.875rem", // text-sm = 14px
-                                            color: "#99A1AF",
-                                            margin: 0,
-                                        }}>@{postData.handle}</p>
+                                            fontSize: "0.875rem",
+                                            color: isDarkPoster ? '#e7f4fd' : '#101828',
+                                            margin: 0
+                                        }} className='duration-200'>@{postData.handle}</p>
                                     </div>
                                 </div>
 
                                 <p style={{
                                     fontSize: "1.125rem", // text-lg = 18px
                                     whiteSpace: "pre-line",
-                                    color: "#101828",
+                                    color: isDarkPoster ? '#e7f4fd' : '#101828',
                                     marginTop: "1rem",
                                     marginBottom: "1rem",
-                                }}>{postData.text}</p>
+                                }} className='duration-200'>{postData.text}</p>
 
                                 {postData.media.map((m, i) => (
                                     <div key={i} style={{
@@ -184,14 +187,30 @@ export default function LandingPage() {
 
                             </div>
                         ) : (
-                            <div className="aspect-video bg-white border rounded-xl flex items-center justify-center text-gray-400">
+                            <div className="aspect-video bg-white border rounded-xl flex items-center justify-center text-gray-400 shadow-lg duration-200"
+                                style={{
+                                    color: isDarkPoster ? '#b7dffa' : '#9DA5B2',
+                                    backgroundColor: isDarkPoster ? '#052d48' : "white",
+                                }}>
                                 Post preview will appear here
                             </div>
 
                         )}
-                        <Button style={{ marginTop: "1rem", }} onClick={handleDownload}>
-                            Download as PNG
-                        </Button>
+                        <div className="flex justify-between">
+
+                            <Button style={{ marginTop: "1rem", }} onClick={handleDownload}>
+                                Download as PNG
+                            </Button>
+
+                            <Button
+                                variant={isDarkPoster ? "default" : "outline"}
+                                onClick={() => setIsDarkPoster(prev => !prev)}
+                                style={{ marginTop: "1rem", }}
+                            >
+                                {isDarkPoster ? "Switch to Light Poster" : "Switch to Dark Poster"}
+                            </Button>
+
+                        </div>
                     </div>
 
                 </div>
